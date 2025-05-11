@@ -394,7 +394,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         log('mason server not installed', lspconfig[lspclient].name)
         -- return
       end
-      local pkg_name = require "mason-lspconfig.mappings.server".lspconfig_to_package[lspconfig[lspclient].name]
+      local pkg_name = require "mason-lspconfig.mappings".get_mason_map().lspconfig_to_package[lspconfig[lspclient].name]
       local pkg
       if pkg_name then
         pkg = require "mason-registry".get_package(pkg_name)
@@ -404,13 +404,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
       log('lsp mason server config ' .. lspconfig[lspclient].name, pkg)
       if pkg then
-        local path = pkg:get_install_path()
-        if not path then
-          -- for some reason lspinstaller does not install the binary, check default PATH
-          log('lsp mason does not install the lsp in its path, fallback')
-          return load_cfg(ft, lspclient, cfg, loaded)
-        end
-
+        -- NOTE: The get_install_path method has been removed from Mason since
+        -- https://github.com/mason-org/mason.nvim/blob/7c7318e8bae7e35
+        -- so we are just checking our Mason directory directly for the package name
         local cmd
         cmd = table.concat({vfn.stdpath('data'), 'mason', 'bin', pkg.name}, path_sep)
         if vfn.executable(cmd) == 0 then
